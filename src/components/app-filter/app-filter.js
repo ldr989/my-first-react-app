@@ -1,54 +1,29 @@
-import { Component } from "react";
 import "./app-filter.css";
 
-class AppFilter extends Component {
-    toggleClass = (name) => {
-        const { data } = this.props;
-        let selected = "";
+const AppFilter = (props) => {
+    const buttonsData = [
+        { name: "all", label: "Все сотрудники" },
+        { name: "rise", label: "На повышение" },
+        { name: "moreThan1000", label: "З/П больше 1000$" },
+    ];
 
-        data.forEach((item) => {
-            if (item.name === name) {
-                selected = item.selected;
-            }
-        });
+    const buttons = buttonsData.map(({ name, label }) => {
+        const active = props.filter === name; // короткая запись которая заменяет if else. Возвращает булиновое значение которое записывается в переменную active
+        const clazz = active ? "btn-light" : "btn-outline-light";
 
-        if (selected) {
-            return "btn btn-light";
-        } else {
-            return "btn btn-outline-light";
-        }
-    };
-    render() {
-        const { onFiltered } = this.props;
         return (
-            <div className="btn-group">
-                <button
-                    className={this.toggleClass("employees")}
-                    data-toggle="employees"
-                    type="button"
-                    onClick={(e) => onFiltered(e)}
-                >
-                    Все сотрудники
-                </button>
-                <button
-                    className={this.toggleClass("rised")}
-                    data-toggle="rised"
-                    type="button"
-                    onClick={(e) => onFiltered(e)}
-                >
-                    На повышение
-                </button>
-                <button
-                    className={this.toggleClass("moreThan")}
-                    data-toggle="moreThan"
-                    type="button"
-                    onClick={(e) => onFiltered(e)}
-                >
-                    З/П больше 1000$
-                </button>
-            </div>
+            <button
+                type="button"
+                className={`btn ${clazz}`}
+                key={name}
+                onClick={() => props.onFilterSelect(name)}
+            >
+                {label}
+            </button>
         );
-    }
-}
+    });
+
+    return <div className="btn-group">{buttons}</div>;
+};
 
 export default AppFilter;

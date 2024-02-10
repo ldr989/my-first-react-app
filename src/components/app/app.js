@@ -36,11 +36,7 @@ class App extends Component {
                 },
             ],
             term: "",
-            filtered: [
-                { name: "employees", selected: true },
-                { name: "rised", selected: false },
-                { name: "moreThan", selected: false },
-            ],
+            filter: "all",
         };
         this.maxId = 4;
     }
@@ -122,65 +118,42 @@ class App extends Component {
         }));
     };
 
-    searchEmp = (items, term, filtered) => {
-        // if (term.length === 0) {
-        //     return items;
-        // }
-
-        const rised = items.filter((item) => {
-            return item.rise === true;
-        });
-
-        const moreThan = items.filter((item) => {
-            return item.salary > 1000;
-        });
-
-        const selected = filtered.find((item) => item.selected)?.name;
-        console.log(selected);
-
-        switch (selected) {
-            case "rised":
-                console.log(rised);
-                return rised.filter((item) => {
-                    return item.name.indexOf(term) > -1;
-                });
-            case "moreThan":
-                return moreThan.filter((item) => {
-                    return item.name.indexOf(term) > -1;
-                });
-            default:
-                return items.filter((item) => {
-                    return item.name.indexOf(term) > -1;
-                });
+    searchEmp = (items, term) => {
+        if (term.length === 0) {
+            return items;
         }
 
-        // return items.filter((item) => {
-        //     return item.name.indexOf(term) > -1; // indexOf ищет сабстроку(term) в строке item.name если находит то выдает позицию, но нам нужно только булиновое значение, поэтому тут стоит оператор >. Если term найдется в строке то вернется его позиция а значит оно будет больше чем -1 и вернется true - выполнится условие фильтера и он вернет новый массив (terms) с найденным элементов внутри(item). Если term не найдется в строке то вернется -1 а значит false, фильтр перейдет к другому item
-        // });
+        return items.filter((item) => {
+            return item.name.indexOf(term) > -1; // indexOf ищет сабстроку(term) в строке item.name если находит то выдает позицию, но нам нужно только булиновое значение, поэтому тут стоит оператор >. Если term найдется в строке то вернется его позиция а значит оно будет больше чем -1 и вернется true - выполнится условие фильтера и он вернет новый массив (terms) с найденным элементов внутри(item). Если term не найдется в строке то вернется -1 а значит false, фильтр перейдет к другому item
+        });
     };
 
     onUpdateSearch = (term) => {
         this.setState({ term });
     };
 
-    onFiltered = (e) => {
-        this.setState(({ filtered }) => ({
-            filtered: filtered.map((item) => {
-                if (e.target.getAttribute("data-toggle") === item.name) {
-                    return { ...item, selected: true };
-                }
-                return { ...item, selected: false };
-            }),
-        }));
+    filterPost = (items, filter) => {
+        switch (filter) {
+            case "rise":
+                return items.filter((item) => item.rise); // тут внутри скобок сокращенная запись которая заменяет конструкцию if else. если значение item.rise === true то возвращается этот item
+            case "moreThan1000":
+                return items.filter((item) => item.salary > 1000);
+            default:
+                return items;
+        }
+    };
+
+    onFilterSelect = (filter) => {
+        this.setState({ filter });
     };
 
     render() {
-        const { data, term, filtered } = this.state;
+        const { data, term, filter } = this.state;
         const employees = this.state.data.length;
         const increased = this.state.data.filter(
             (item) => item.increase
         ).length;
-        const visibleData = this.searchEmp(data, term, filtered);
+        const visibleData = this.filterPost(this.searchEmp(data, term), filter);
 
         return (
             <div className="app">
@@ -188,7 +161,10 @@ class App extends Component {
 
                 <div className="search-panel">
                     <SearchPanel onUpdateSearch={this.onUpdateSearch} />
-                    <AppFilter onFiltered={this.onFiltered} data={filtered} />
+                    <AppFilter
+                        filter={filter}
+                        onFilterSelect={this.onFilterSelect}
+                    />
                 </div>
 
                 <EmployeesList
